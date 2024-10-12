@@ -46,7 +46,7 @@ func list(c *gin.Context) {
 		return
 	}
 
-	rows, err := db.Query("SELECT * FROM `admin_areas`")
+	rows, err := db.Query("SELECT * FROM `admin_areas` LIMIT ? OFFSET ?", 10, 0)
 	if err != nil {
 		common.ErrorJSON(c, err)
 		return
