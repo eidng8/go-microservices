@@ -2,6 +2,7 @@
   <configuration default="false" name="go build eidng8.cc/microservices/admin-area" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
     <module name="microservices" />
     <working_directory value="$PROJECT_DIR$/admin-area" />
+    <go_parameters value="-tags=jsoniter" />
     <envs>
       <env name="DB_CONN" value="127.0.0.1:43306" />
       <env name="DB_NAME" value="admin_areas" />

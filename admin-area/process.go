@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"eidng8.cc/microservices/common"
-	"eidng8.cc/microservices/rdbms/mysql"
 )
 
 type AdminArea struct {
@@ -17,8 +18,8 @@ type AdminArea struct {
 	CreatedAt sql.NullString
 	UpdatedAt sql.NullString
 	DeletedAt sql.NullString
-	_lft      int
-	_rgt      int
+	lft       int
+	rgt       int
 	ParentId  sql.NullInt64
 }
 
@@ -29,7 +30,7 @@ func rowsToArray(rows *sql.Rows) ([]AdminArea, error) {
 		err := rows.Scan(
 			&adminArea.Id, &adminArea.Name, &adminArea.Memo,
 			&adminArea.CreatedAt, &adminArea.UpdatedAt, &adminArea.DeletedAt,
-			&adminArea._lft, &adminArea._rgt, &adminArea.ParentId,
+			&adminArea.lft, &adminArea.rgt, &adminArea.ParentId,
 		)
 		if err != nil {
 			return nil, err
@@ -39,33 +40,19 @@ func rowsToArray(rows *sql.Rows) ([]AdminArea, error) {
 	return adminAreas, nil
 }
 
-func list(c *gin.Context) {
-	db, err := mysql.Connect(host, user, pass, dbname)
+func list(c *gin.Context, env *Env) {
+	page := common.GetPaginationParams(c)
+	areas, err := env.db.AdminArea.
+		Query().
+		Offset(page.Page * page.PerPage).
+		Limit(page.PerPage).
+		All(context.Background())
 	if err != nil {
+		log.Printf("Could not query admin areas: %v", err)
 		common.ErrorJSON(c, err)
 		return
 	}
-
-	rows, err := db.Query("SELECT * FROM `admin_areas` LIMIT ? OFFSET ?", 10, 0)
-	if err != nil {
-		common.ErrorJSON(c, err)
-		return
-	}
-
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			common.ErrorJSON(c, err)
-		}
-	}(rows)
-
-	res, err := rowsToArray(rows)
-	if err != nil {
-		common.ErrorJSON(c, err)
-		return
-	}
-
-	common.RespondJSON(c, res)
+	common.RespondJSON(c, areas)
 }
 
 func create(c *gin.Context) {

@@ -28,18 +28,18 @@ CREATE TABLE `admin_areas`
     `created_at` DATETIME NULL,
     `updated_at` DATETIME NULL,
     `deleted_at` DATETIME NULL,
-    `_lft` INT UNSIGNED DEFAULT '0' NOT NULL,
-    `_rgt` INT UNSIGNED DEFAULT '0' NOT NULL,
+    `lft` INT UNSIGNED DEFAULT '0' NOT NULL,
+    `rgt` INT UNSIGNED DEFAULT '0' NOT NULL,
     `parent_id` INT UNSIGNED NULL,
-    CONSTRAINT `ui_admin_areas` UNIQUE (`name`, `_lft`, `_rgt`, `parent_id`)
+    CONSTRAINT `ui_admin_areas` UNIQUE (`name`, `lft`, `rgt`, `parent_id`)
 ) COMMENT '行政区划表' COLLATE = `utf8mb4_unicode_ci`;
 
-CREATE INDEX `ix_admin_areas_nested_set` ON `admin_areas` (`_lft`, `_rgt`, `parent_id`);
+CREATE INDEX `ix_admin_areas_nested_set` ON `admin_areas` (`lft`, `rgt`, `parent_id`);
 
 LOCK TABLES `admin_areas` WRITE;
 /*!40000 ALTER TABLE `admin_areas`
     DISABLE KEYS */;
-INSERT INTO `admin_areas` (`id`, `name`, `memo`, `created_at`, `updated_at`, `deleted_at`, `_lft`, `_rgt`, `parent_id`)
+INSERT INTO `admin_areas` (`id`, `name`, `memo`, `created_at`, `updated_at`, `deleted_at`, `lft`, `rgt`, `parent_id`)
 VALUES (1, '中国', NULL, '2024-09-23 16:20:09', '2024-09-23 16:20:59', NULL, 1, 6704, NULL),
        (2, '北京市', NULL, '2024-09-23 16:20:09', '2024-09-23 16:20:59', NULL, 2, 37, 1),
        (3, '市辖区', NULL, '2024-09-23 16:20:09', '2024-09-23 16:20:59', NULL, 3, 36, 2),

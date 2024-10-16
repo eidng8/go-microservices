@@ -10,15 +10,7 @@ import (
 )
 
 func Connect(addr, user, password, dbname string) (*sql.DB, error) {
-	cfg := ms.Config{
-		User:                 user,
-		Passwd:               password,
-		Net:                  "tcp",
-		Addr:                 addr,
-		DBName:               dbname,
-		MultiStatements:      true,
-		AllowNativePasswords: true,
-	}
+	cfg := GetConnCfg(addr, user, password, dbname)
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		return nil, err
@@ -27,4 +19,19 @@ func Connect(addr, user, password, dbname string) (*sql.DB, error) {
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(10)
 	return db, nil
+}
+
+func GetConnCfg(addr, user, password, dbname string) ms.Config {
+	return ms.Config{
+		User:                 user,
+		Passwd:               password,
+		Net:                  "tcp",
+		Addr:                 addr,
+		DBName:               dbname,
+		MultiStatements:      true,
+		AllowNativePasswords: true,
+		ParseTime:            true,
+		Collation:            "utf8mb4_unicode_ci",
+		Loc:                  time.Local,
+	}
 }
