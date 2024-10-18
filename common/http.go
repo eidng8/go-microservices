@@ -7,7 +7,7 @@ import (
 )
 
 func RespondJSON(c *gin.Context, data interface{}) {
-	c.JSON(http.StatusOK, data)
+	RespondWithCodeJSON(c, http.StatusOK, data)
 }
 
 func RespondWithCodeJSON(c *gin.Context, code int, data interface{}) {
@@ -15,7 +15,23 @@ func RespondWithCodeJSON(c *gin.Context, code int, data interface{}) {
 }
 
 func ErrorJSON(c *gin.Context, err error) {
-	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	ErrorWithCodeJSON(c, http.StatusInternalServerError, err)
+}
+
+func Error400JSON(c *gin.Context, err error) {
+	ErrorWithCodeJSON(c, http.StatusBadRequest, err)
+}
+
+func Error401JSON(c *gin.Context, err error) {
+	ErrorWithCodeJSON(c, http.StatusUnauthorized, err)
+}
+
+func Error403JSON(c *gin.Context, err error) {
+	ErrorWithCodeJSON(c, http.StatusForbidden, err)
+}
+
+func Error422JSON(c *gin.Context, err error) {
+	ErrorWithCodeJSON(c, http.StatusUnprocessableEntity, err)
 }
 
 func ErrorWithCodeJSON(c *gin.Context, code int, err error) {

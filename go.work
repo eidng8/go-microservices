@@ -6,4 +6,5 @@ use (
 	./auth-service
 	./common
 	./rdbms
+	admin-area/tools
 )

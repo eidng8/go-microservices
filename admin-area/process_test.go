@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,9 +15,18 @@ var router *gin.Engine
 
 func setupTest(tb testing.TB) func(tb testing.TB) {
 	env = setup()
+	tx, err := env.db.BeginTx(context.Background(), nil)
+	if err != nil {
+		tb.Fatalf("Could not start transaction: %v", err)
+	}
 	router = setupRouter(env)
 	return func(tb testing.TB) {
-		_ = env.db.Close()
+		if err := tx.Rollback(); err != nil {
+			tb.Fatalf("Could not rollback transaction: %v", err)
+		}
+		if err = env.db.Close(); err != nil {
+			tb.Fatalf("Could not close db: %v", err)
+		}
 	}
 }
 
@@ -45,7 +55,7 @@ func Test_list(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 	q := req.URL.Query()
 	q.Set("page", "1")
-	q.Set("per_page", "20")
+	q.Set("per_page", "5")
 	req.URL.RawQuery = q.Encode()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)

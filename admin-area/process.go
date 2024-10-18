@@ -2,43 +2,15 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"net/http"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/gin-gonic/gin"
 
+	"eidng8.cc/microservices/admin-area/models"
 	"eidng8.cc/microservices/common"
 )
-
-type AdminArea struct {
-	Id        int64
-	Name      string
-	Memo      sql.NullString
-	CreatedAt sql.NullString
-	UpdatedAt sql.NullString
-	DeletedAt sql.NullString
-	lft       int
-	rgt       int
-	ParentId  sql.NullInt64
-}
-
-func rowsToArray(rows *sql.Rows) ([]AdminArea, error) {
-	var adminAreas []AdminArea
-	for rows.Next() {
-		adminArea := AdminArea{}
-		err := rows.Scan(
-			&adminArea.Id, &adminArea.Name, &adminArea.Memo,
-			&adminArea.CreatedAt, &adminArea.UpdatedAt, &adminArea.DeletedAt,
-			&adminArea.lft, &adminArea.rgt, &adminArea.ParentId,
-		)
-		if err != nil {
-			return nil, err
-		}
-		adminAreas = append(adminAreas, adminArea)
-	}
-	return adminAreas, nil
-}
 
 func list(c *gin.Context, env *Env) {
 	page := common.GetPaginationParams(c)
@@ -52,25 +24,49 @@ func list(c *gin.Context, env *Env) {
 		common.ErrorJSON(c, err)
 		return
 	}
-	common.RespondJSON(c, areas)
+	vo := make([]models.AdminAreaVO, len(areas))
+	for i, area := range areas {
+		vo[i].FromAdminArea(area)
+	}
+	common.RespondJSON(c, vo)
 }
 
-func create(c *gin.Context) {
+func create(c *gin.Context, env *Env) {
+	var data models.AdminAreaCreateDTO
+	if err := c.ShouldBind(&data); err != nil {
+		common.Error422JSON(c, err)
+		return
+	}
+	area := env.db.AdminArea.Create()
+	area.SetName(data.Name)
+	if data.ParentID > 0 {
+		area.SetParentID(data.ParentID)
+	}
+	if data.Memo != "" {
+		area.SetMemo(&sql.NullString{String: data.Memo, Valid: true})
+	}
+	saved, err := area.Save(context.Background())
+	if err != nil {
+		common.ErrorJSON(c, err)
+		return
+	}
+	var vo models.AdminAreaVO
+	vo.FromAdminArea(saved)
+	common.RespondJSON(c, vo)
+}
+
+func update(c *gin.Context, env *Env) {
 	common.ErrorWithCodeJSON(c, http.StatusNotImplemented, nil)
 }
 
-func update(c *gin.Context) {
+func detail(c *gin.Context, env *Env) {
 	common.ErrorWithCodeJSON(c, http.StatusNotImplemented, nil)
 }
 
-func detail(c *gin.Context) {
+func remove(c *gin.Context, env *Env) {
 	common.ErrorWithCodeJSON(c, http.StatusNotImplemented, nil)
 }
 
-func remove(c *gin.Context) {
-	common.ErrorWithCodeJSON(c, http.StatusNotImplemented, nil)
-}
-
-func restore(c *gin.Context) {
+func restore(c *gin.Context, env *Env) {
 	common.ErrorWithCodeJSON(c, http.StatusNotImplemented, nil)
 }

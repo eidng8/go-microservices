@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"database/sql"
 	"time"
 
 	"entgo.io/ent"
@@ -26,20 +25,21 @@ func (AdminArea) Annotations() []schema.Annotation {
 
 func (AdminArea) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique().Immutable(),
+		field.Uint64("id").Unique().Immutable(),
 		field.String("name").NotEmpty().Comment("行政区划名称"),
-		field.String("memo").Optional().GoType(&sql.NullString{}).Nillable().Comment("备注"),
+		field.String("memo").Optional().Nillable().Comment("备注"),
 		field.Time("created_at").Default(time.Now).Immutable(),
-		field.Time("updated_at").Optional().UpdateDefault(time.Now),
+		field.Time("updated_at").Optional().Nillable().UpdateDefault(time.Now),
 		field.Int("lft").Default(0),
 		field.Int("rgt").Default(0),
-		field.Int("parent_id").Optional().Nillable(),
+		field.Uint64("parent_id").Optional().Nillable(),
 	}
 }
 
 func (AdminArea) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("children", AdminArea.Type).From("parent"),
+		edge.To("children", AdminArea.Type).
+			From("parent").Field("parent_id").Unique(),
 	}
 }
 

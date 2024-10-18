@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"eidng8.cc/microservices/admin-area/ent"
+	_ "eidng8.cc/microservices/admin-area/ent/runtime"
 	"eidng8.cc/microservices/rdbms/mysql"
 )
 
